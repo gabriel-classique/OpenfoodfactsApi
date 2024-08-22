@@ -22,10 +22,6 @@ interface FoodApi {
     suspend fun getProductByBarcode(@Path("barcode") barcode: String): Response<BarcodeResponse>
 
     companion object{
-        const val search =
-            "https://world.openfoodfacts.org/cgi/search.pl?search_terms=banania&search_simple=1&action=process&json=1"
-
-        const val RICE_NOODLES = "737628064502"
         const val BARCODE_URL = "api/v1/product/{barcode}"
         const val SEARCH_URL = "cgi/search.pl"
         const val URL = "https://world.openfoodfacts.org/"
