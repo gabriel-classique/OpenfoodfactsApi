@@ -7,19 +7,14 @@ import retrofit2.http.Query
 
 interface FoodApi {
 
-//    @GET("https://world.openfoodfacts.net/api/v2/search?categories_tags=Nutella")
-//    suspend fun getProduct(): Response<SearchResponse>
-
-
-
     @GET(SEARCH_URL)
-    suspend fun searchProduct(
+    suspend fun getByName(
         @Query("search_terms") name: String,
         @Query("json") json: Int = 1,
     ): Response<SearchResponse>
 
     @GET(BARCODE_URL)
-    suspend fun getProductByBarcode(@Path("barcode") barcode: String): Response<BarcodeResponse>
+    suspend fun getByBarcode(@Path("barcode") barcode: String): Response<BarcodeResponse>
 
     companion object{
         const val BARCODE_URL = "api/v1/product/{barcode}"

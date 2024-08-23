@@ -53,6 +53,14 @@ android {
 
 dependencies {
 
+    implementation ("com.google.accompanist:accompanist-permissions:0.34.0")
+
+    implementation ("com.google.mlkit:text-recognition:16.0.0")
+    implementation ("androidx.camera:camera-camera2:1.2.2")
+    implementation ("androidx.camera:camera-lifecycle:1.2.2")
+    implementation ("androidx.camera:camera-view:1.2.2")
+    implementation ("com.google.mlkit:barcode-scanning:17.1.0")
+
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation)
     ksp(libs.hilt.androidcompiler)
@@ -72,6 +80,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
+    implementation(libs.androidx.navigation)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
