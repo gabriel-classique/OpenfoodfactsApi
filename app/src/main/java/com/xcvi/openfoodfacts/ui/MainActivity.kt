@@ -1,4 +1,4 @@
-package com.xcvi.openfoodfacts
+package com.xcvi.openfoodfacts.ui
 
 import android.Manifest
 import android.os.Bundle
@@ -8,7 +8,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.ImageAnalysis.Analyzer
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -38,7 +37,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -70,7 +68,6 @@ class MainActivity : ComponentActivity() {
                         composable("main_screen") {
                             MainScreen(
                                 onSuccess = {
-
                                     Toast.makeText(this@MainActivity, it, Toast.LENGTH_SHORT)
                                         .show()
                                     viewModel.catch(it)
@@ -100,7 +97,10 @@ fun SearchScreen(viewModel: FoodViewModel) {
     var foodName by remember {
         mutableStateOf("")
     }
-    val products = viewModel.searchState.collectAsState().value
+    val state = viewModel.state.collectAsState().value
+    var page by remember {
+        mutableStateOf(1)
+    }
     LazyColumn {
         item {
             Row {
@@ -108,51 +108,64 @@ fun SearchScreen(viewModel: FoodViewModel) {
                     modifier = Modifier.weight(1f),
                     value = foodName, onValueChange = {
                         foodName = it
-                        //viewModel.search(it)
                     }
                 )
                 Button(
-                    onClick = { viewModel.search(foodName) }
+                    onClick = {
+                        page = 1
+                        viewModel.search(foodName, page = page)
+                    }
                 ) {
                     Text(text = "Search")
                 }
             }
         }
-        if (products.foods.isNotEmpty()) {
-            products.foods.forEach {
-                item {
-                    Column {
-                        Card(modifier = Modifier.fillMaxWidth()) {
-                            Column(Modifier.padding(4.dp)) {
-                                Text(
-                                    text = it.product_name,
-                                    fontSize = MaterialTheme.typography.headlineLarge.fontSize
-                                )
-                                Text(
-                                    text = "Calories per 100g: " + it.nutriments?.calories,
-                                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
-                                )
-                                Text(
-                                    text = "Carbohydrates: " + it.nutriments?.carbs,
-                                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
-                                )
-                                Text(
-                                    text = "Fat: " + it.nutriments?.fats,
-                                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
-                                )
-                                Text(
-                                    text = "Protein: " + it.nutriments?.protein,
-                                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(12.dp))
+        item {
+            Row {
+                Button(
+                    onClick = {
+                        page++
+                        viewModel.search(foodName, page = page)
                     }
+                ) {
+                    Text(text = "Next Page")
                 }
             }
         }
 
+        state.searchResult.forEach {
+            item {
+                Column {
+                    Card(modifier = Modifier.fillMaxWidth()) {
+                        Column(Modifier.padding(4.dp)) {
+                            Text(
+                                text = it.name,
+                                fontSize = MaterialTheme.typography.headlineLarge.fontSize
+                            )
+                            Text(
+                                text = "Calories per 100g: " + it.calories,
+                                fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                            )
+                            Text(
+                                text = "Carbohydrates: " + it.carbs,
+                                fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                            )
+                            Text(
+                                text = "Fat: " + it.fats,
+                                fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                            )
+                            Text(
+                                text = "Protein: " + it.protein,
+                                fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+            }
+        }
     }
+
 
 }
 

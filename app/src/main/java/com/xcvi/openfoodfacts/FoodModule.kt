@@ -1,9 +1,9 @@
 package com.xcvi.openfoodfacts
 
 import com.google.gson.GsonBuilder
-import com.xcvi.openfoodfacts.api.FoodApi
-import com.xcvi.openfoodfacts.api.FoodApi.Companion.SEARCH_URL
-import com.xcvi.openfoodfacts.api.FoodApi.Companion.URL
+import com.xcvi.openfoodfacts.data.FoodApi
+import com.xcvi.openfoodfacts.data.FoodApi.Companion.URL
+import com.xcvi.openfoodfacts.data.FoodRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -11,7 +11,6 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -20,12 +19,17 @@ import javax.inject.Singleton
 object FoodModule {
     @Provides
     @Singleton
+    fun providesFoodRepository(foodApi: FoodApi) = FoodRepository(foodApi)
+
+
+    @Provides
+    @Singleton
     fun providesFoodApi(): FoodApi{
         val gson = GsonBuilder().create()
         val httpClient = OkHttpClient.Builder()
-            .connectTimeout(10, TimeUnit.SECONDS)
-            .readTimeout(10, TimeUnit.SECONDS)
-            .writeTimeout(10, TimeUnit.SECONDS)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
             .build()
 
         return Retrofit.Builder()
@@ -35,6 +39,8 @@ object FoodModule {
             .build()
             .create(FoodApi::class.java)
     }
+
+
 
 
 }

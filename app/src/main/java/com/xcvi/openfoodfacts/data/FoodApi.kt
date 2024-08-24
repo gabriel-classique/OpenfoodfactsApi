@@ -1,4 +1,4 @@
-package com.xcvi.openfoodfacts.api
+package com.xcvi.openfoodfacts.data
 
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -11,6 +11,7 @@ interface FoodApi {
     suspend fun getByName(
         @Query("search_terms") name: String,
         @Query("json") json: Int = 1,
+        @Query("page") page: Int = 1,
     ): Response<SearchResponse>
 
     @GET(BARCODE_URL)

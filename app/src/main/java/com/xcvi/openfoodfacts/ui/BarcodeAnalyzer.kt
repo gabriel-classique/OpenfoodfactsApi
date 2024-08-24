@@ -1,4 +1,4 @@
-package com.xcvi.openfoodfacts
+package com.xcvi.openfoodfacts.ui
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -23,7 +23,6 @@ class BarcodeAnalyzer(private val onSuccess: (String)-> Unit) : ImageAnalysis.An
         .build()
 
     private val scanner = BarcodeScanning.getClient(options)
-
 
 
     @SuppressLint("UnsafeOptInUsageError")
