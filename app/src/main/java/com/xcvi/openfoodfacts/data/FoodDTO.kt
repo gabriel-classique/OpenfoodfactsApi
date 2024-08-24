@@ -3,24 +3,24 @@ package com.xcvi.openfoodfacts.data
 import com.google.gson.annotations.SerializedName
 import com.xcvi.openfoodfacts.domain.FoodModel
 
-data class SearchResponse(
+data class SearchDTO(
     val count: Int = 0,
-    val products: List<FoodDto> = emptyList(),
+    val products: List<FoodDTO> = emptyList(),
 )
-data class BarcodeResponse(
-    val product: FoodDto? = null,
+data class BarcodeDTO(
+    val product: FoodDTO? = null,
 )
 
 
-data class FoodDto(
+data class FoodDTO(
     val image_url: String? = null,
     val product_name: String = "",
     val id: String = "",
     val code: String = "",
-    val nutriments: Nutriments? = null
+    val nutriments: NutrimentsDTO? = null
 )
 
-data class Nutriments(
+data class NutrimentsDTO(
     @SerializedName("energy-kcal_100g")
     val calories: Double = 0.0,
     @SerializedName("carbohydrates_100g")
@@ -32,16 +32,8 @@ data class Nutriments(
 )
 
 
-fun FoodDto.toModel(): FoodModel {
-    return FoodModel(
-        id = this.id,
-        name = this.product_name,
-        calories = this.nutriments?.calories ?: 0.0,
-        carbs = this.nutriments?.carbs ?: 0.0,
-        fats = this.nutriments?.fats ?: 0.0,
-        protein = this.nutriments?.protein ?: 0.0,
-    )
-}
+
+
 
 
 

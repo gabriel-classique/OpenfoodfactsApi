@@ -12,10 +12,10 @@ interface FoodApi {
         @Query("search_terms") name: String,
         @Query("json") json: Int = 1,
         @Query("page") page: Int = 1,
-    ): Response<SearchResponse>
+    ): Response<SearchDTO>
 
     @GET(BARCODE_URL)
-    suspend fun getByBarcode(@Path("barcode") barcode: String): Response<BarcodeResponse>
+    suspend fun getByBarcode(@Path("barcode") barcode: String): Response<BarcodeDTO>
 
     companion object{
         const val BARCODE_URL = "api/v1/product/{barcode}"

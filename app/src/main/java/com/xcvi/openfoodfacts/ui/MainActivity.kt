@@ -1,6 +1,7 @@
 package com.xcvi.openfoodfacts.ui
 
 import android.Manifest
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -12,6 +13,7 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -70,7 +73,7 @@ class MainActivity : ComponentActivity() {
                                 onSuccess = {
                                     Toast.makeText(this@MainActivity, it, Toast.LENGTH_SHORT)
                                         .show()
-                                    viewModel.catch(it)
+                                    viewModel.catch(it,this@MainActivity)
                                     navController.navigate("food_screen")
 
                                 },
@@ -83,7 +86,7 @@ class MainActivity : ComponentActivity() {
                             FoodScreen(viewModel)
                         }
                         composable("search_screen") {
-                            SearchScreen(viewModel = viewModel)
+                            SearchScreen(viewModel = viewModel, this@MainActivity)
                         }
                     }
                 }
@@ -93,7 +96,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun SearchScreen(viewModel: FoodViewModel) {
+fun SearchScreen(viewModel: FoodViewModel, context: Context) {
     var foodName by remember {
         mutableStateOf("")
     }
@@ -113,54 +116,64 @@ fun SearchScreen(viewModel: FoodViewModel) {
                 Button(
                     onClick = {
                         page = 1
-                        viewModel.search(foodName, page = page)
+                        viewModel.search(foodName, page = page, context)
                     }
                 ) {
                     Text(text = "Search")
                 }
             }
         }
-        item {
-            Row {
-                Button(
-                    onClick = {
-                        page++
-                        viewModel.search(foodName, page = page)
+
+        if(state.isLoading){
+            item {
+                Box(modifier = Modifier.fillMaxSize()){
+                    CircularProgressIndicator(Modifier.align(Alignment.Center))
+                }
+            }
+        } else {
+            state.searchResult.forEach {
+                item {
+                    Column {
+                        Card(modifier = Modifier.fillMaxWidth()) {
+                            Column(Modifier.padding(4.dp)) {
+                                Text(
+                                    text = it.name,
+                                    fontSize = MaterialTheme.typography.headlineLarge.fontSize
+                                )
+                                Text(
+                                    text = "Calories per 100g: " + it.calories,
+                                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                                )
+                                Text(
+                                    text = "Carbohydrates: " + it.carbs,
+                                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                                )
+                                Text(
+                                    text = "Fat: " + it.fats,
+                                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                                )
+                                Text(
+                                    text = "Protein: " + it.protein,
+                                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
                     }
-                ) {
-                    Text(text = "Next Page")
                 }
             }
         }
-
-        state.searchResult.forEach {
+        if(state.searchResult.isNotEmpty() && !state.isLoading){
             item {
-                Column {
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Column(Modifier.padding(4.dp)) {
-                            Text(
-                                text = it.name,
-                                fontSize = MaterialTheme.typography.headlineLarge.fontSize
-                            )
-                            Text(
-                                text = "Calories per 100g: " + it.calories,
-                                fontSize = MaterialTheme.typography.bodyLarge.fontSize
-                            )
-                            Text(
-                                text = "Carbohydrates: " + it.carbs,
-                                fontSize = MaterialTheme.typography.bodyLarge.fontSize
-                            )
-                            Text(
-                                text = "Fat: " + it.fats,
-                                fontSize = MaterialTheme.typography.bodyLarge.fontSize
-                            )
-                            Text(
-                                text = "Protein: " + it.protein,
-                                fontSize = MaterialTheme.typography.bodyLarge.fontSize
-                            )
+                Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center) {
+                    Button(
+                        onClick = {
+                            page++
+                            viewModel.search(foodName, page = page, context)
                         }
+                    ) {
+                        Text(text = "Next Page")
                     }
-                    Spacer(modifier = Modifier.height(12.dp))
                 }
             }
         }
@@ -171,24 +184,27 @@ fun SearchScreen(viewModel: FoodViewModel) {
 
 @Composable
 fun FoodScreen(viewModel: FoodViewModel) {
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = viewModel.foodName, fontSize = MaterialTheme.typography.headlineLarge.fontSize)
-        Text(
-            text = "Calories per 100g: " + viewModel.kcal,
-            fontSize = MaterialTheme.typography.bodyLarge.fontSize
-        )
-        Text(
-            text = "Carbohydrates: " + viewModel.carbs,
-            fontSize = MaterialTheme.typography.bodyLarge.fontSize
-        )
-        Text(text = "Fat: " + viewModel.fat, fontSize = MaterialTheme.typography.bodyLarge.fontSize)
-        Text(
-            text = "Protein: " + viewModel.protein,
-            fontSize = MaterialTheme.typography.bodyLarge.fontSize
-        )
+    val state = viewModel.state.collectAsState().value
+    state.currentFood?.let {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = it.name, fontSize = MaterialTheme.typography.headlineLarge.fontSize)
+            Text(
+                text = "Calories per 100g: " + it.calories,
+                fontSize = MaterialTheme.typography.bodyLarge.fontSize
+            )
+            Text(
+                text = "Carbohydrates: " + it.carbs,
+                fontSize = MaterialTheme.typography.bodyLarge.fontSize
+            )
+            Text(text = "Fat: " + it.fats, fontSize = MaterialTheme.typography.bodyLarge.fontSize)
+            Text(
+                text = "Protein: " + it.protein,
+                fontSize = MaterialTheme.typography.bodyLarge.fontSize
+            )
+        }
     }
 }
 
